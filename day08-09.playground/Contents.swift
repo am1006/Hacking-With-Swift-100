@@ -104,7 +104,7 @@ london.collectTaxes()
  
  If a struct has a variable property but the instance of the struct was created as a constant, that property can’t be changed – the instance of the struct is constant, so all its properties are also constant regardless of how they were created.
  
- The problem is that when you create the struct Swift has no idea whether you will use it with constants or variables, so by default it takes the safe approach: Swift won’t let you write methods that change properties (i.e., side effect free) unless you specifically request it.
+ The problem is that when you create the struct Swift has no idea whether you will use it with constants or variables, so by default it takes the safe approach: Swift won’t let you write methods that change properties (i.e., Swift ensures side effect free) unless you specifically request it.
 
  When you want to change a property inside a method, you need to mark it using the `mutating` keyword.
  
@@ -157,3 +157,156 @@ toys.remove(at: 0)
 /**
  # Day 09 - Structs Part 2
  */
+
+/**
+ ## Initializers
+ 
+ Initializers are special methods that provide different ways to create your struct.
+ 
+ All structs come with one by default, called their **memberwise initializer** – this asks you to provide a value for each property when you create the struct.
+ 
+ From this (article)[https://www.hackingwithswift.com/quick-start/understanding-swift/how-do-swifts-memberwise-initializers-work]:
+ - By default, all Swift structs get a synthesized memberwise initializer by default, which means that we automatically get an initializer that accepts values for each of the struct’s properties.
+ -  if any of your properties have default values, then they’ll be incorporated into the initializer as default parameter values. So, if I make a struct like this:
+ - The second clever thing Swift does is remove the memberwise initializer if you create an initializer of your own.
+ 
+ */
+
+struct User {
+    var username: String
+    
+    init() {
+        username = "Anonymous"
+        print("Creating a new user!")
+    }
+}
+
+var user = User()
+
+/// So, as soon as you add a custom initializer for your struct, the default memberwise initializer goes away. If you want it to stay, move your custom initializer to an `extension`, like this:
+
+struct Employee {
+    var name: String
+    var yearsActive = 0
+}
+
+extension Employee {
+    init() {
+        self.name = "Anonymous"
+        print("Creating an anonymous employee…")
+    }
+}
+
+// creating a named employee now works
+let roslin = Employee(name: "Laura Roslin")
+
+
+/**
+ ## `self` keyword - referring to the current instance
+
+ Just like `this` in Java.
+ 
+ And:
+    Outside of initializers, the main reason for using self is because we’re in a closure and Swift requires us to so we’re making it clear we understand what’s happening.
+ 
+ (https://www.hackingwithswift.com/quick-start/understanding-swift/when-would-you-use-self-in-a-method)
+ */
+
+struct Person1 {
+    var name: String
+    
+    init(name: String) {
+        print("\(name) was born!")
+        self.name = name
+    }
+}
+
+var person1 = Person1(name: "Leo")
+
+/**
+ # Lazy properties
+ 
+ As a performance optimization, Swift lets you create some properties only when they are needed.
+
+ */
+
+/// consider this `FamilyTree` struct – it doesn’t do much, but _in theory_ creating a family tree for someone takes a long time:
+
+struct FamilyTree {
+    init() {
+        print("Creating family tree!")
+    }
+}
+
+
+/// If we add the `lazy` keyword to the familyTree property, then Swift will only create the FamilyTree struct **when it’s first accessed**:
+
+struct Person2 {
+    var name: String
+    lazy var familyTree = FamilyTree()
+    
+    init(name: String) {
+        print("\(name) was born!")
+        self.name = name
+    }
+}
+
+/**
+ Extenstion for Lazy:
+ https://www.hackingwithswift.com/quick-start/understanding-swift/when-should-properties-be-lazy
+ 
+ Swift’s lazy properties let us delay the creation of a property until it’s actually used, which makes them like a computed property.
+ 
+ However, _unlike_ a computed property, Lazy Properties store the result that gets calculated, so that subsequent accesses to the property don’t redo the work. (Recall that computed property needs to be computed each time we use it)
+ 
+ However, that doesn’t mean we should make every property lazy, or indeed **most** properties – in practice, the **majority** of properties are just standard stored properties.
+ 
+ There are a few reasons. Read them if you forgot.
+ */
+
+
+/**
+ ## Static properties and methods
+ 
+ All the properties and methods we’ve created so far have belonged to individual instances of structs.
+
+ */
+
+/// You can also ask Swift to share specific properties and methods across all instances of the struct by declaring them as `static`.
+
+/// Please notice that, in Java, non-static variable cannot be referenced from a static context <-> static variables can be referenced from a non-static context
+
+struct Student {
+    static var classSize = 0
+    var name: String
+
+    init(name: String) {
+        self.name = name
+        // notice that we need to read it using the class name
+        Student.classSize += 1
+    }
+}
+
+let ed = Student(name: "Ed")
+let taylor = Student(name: "Taylor")
+
+/**
+ ## Access control
+ 
+ Access control lets you restrict which code can use properties and methods.
+ 
+ */
+
+struct Person3 {
+    private var id: String
+
+    init(id: String) {
+        self.id = id
+    }
+    
+    func identify() -> String {
+        return "My ID is \(id)"
+    }
+}
+
+let jee = Person3(id: "12345").identify()
