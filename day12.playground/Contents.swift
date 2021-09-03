@@ -137,4 +137,128 @@ let secondAge: Int! = nil
  ## Optional chaining
  
  Swift provides us with a shortcut when using optionals: if you want to access something like `a.b.c` and `b` is optional, you can write a question mark after it to enable optional chaining: `a.b?.c`.
+ 
+ When that code is run, Swift will check whether `b` has a value, and if it’s  `nil` the rest of the line will be ignored – Swift will return `nil` immediately. But if it has a value, it will be unwrapped and execution will continue.
+ 
+ Here is an example of how this could be useful:
  */
+
+let names = ["John", "Paul", "George", "Ringo"]
+
+/// Now let's use the `first` property of this array - it will either return a value or `nil` (if the array is empty).
+/// And this is how we can use optional chaining to call `uppercased()` method on the result:
+
+let beatle = names.first?.uppercased()
+
+/// That question mark is optional chaining – if first returns `nil` then Swift won’t try to uppercase it, and will set `beatle` to `nil` immediately.
+
+/**
+ ## Optional try
+ */
+
+/// Back when we were talking about _throwing functions_, we looked at this code:
+
+enum PasswordError: Error {
+    case obvious
+}
+
+func checkPassword(_ password: String) throws -> Bool {
+    if password == "password" {
+        throw PasswordError.obvious
+    }
+
+    return true
+}
+
+do {
+    try checkPassword("password")
+    print("That password is good!")
+} catch {
+    print("You can't use that password.")
+}
+
+/// That runs a throwing function, using `do`, `try`, and `catch` to handle errors gracefully.
+/// There are 2 alternatives to `try`, both of which will make more sense now that you understand optionals and force unwrapping.
+
+/// The first is `try?`:  **it converts throwing functions into functions that return an optional**. If the function throws an error you’ll be sent `nil` as the result, otherwise you’ll get the return value wrapped as an optional.
+
+/// Using `try?` we can run checkPassword() like this:
+
+if let result = try? checkPassword("password") {
+    print("Result was \(result)")
+} else {
+    print("D'oh.")
+}
+
+/// The other alternative is `try!`, which you can use when you know for sure that the function will not fail. If the function does throw an error, your code will crash.
+/// Using `try!` we can rewrite the code to this:
+
+try! checkPassword("sekrit")
+print("OK!")
+
+/**
+ ## Failable initializers
+ 
+ Previously, when talking about force unwrapping, I used this code:
+ 
+ ```swift
+ let str = "5"
+ let num = Int(str)
+ ```
+ 
+ That converts a string to an integer, but because you might try to pass any string there what you actually get back is an optional integer.
+ 
+ Here we are actually dealing with a _failable initializer_ behind the scene: an initializer that might work or might not.
+ 
+ We can write these in your own structs and classes by
+ - using `init?()` rather than `init()`
+ - and return `nil` if something goes wrong.
+ 
+ The return value will then be an optional of your type, for you to unwrap however you want.
+ */
+
+/// Example: we could code a `Person` struct that **must be** created using a nine-letter ID string. If anything other than a nine-letter string is used we’ll return `nil`, otherwise we’ll continue as normal.
+
+struct Person {
+    var id: String
+    init?(id: String) {
+        if id.count == 9 {
+            self.id = id
+        } else {
+            return nil
+        }
+    }
+}
+
+/**
+ ## Typecasting `as?`
+ 
+ Finally! Polymorphism ("Many forms")
+ 
+ Runtime binding
+ 
+ */
+
+/// Let's start with this example:
+class Animal { }
+class Fish: Animal { }
+
+class Dog: Animal {
+    func makeNoise() {
+        print("Woof!")
+    }
+}
+
+/// We can create a couple of fish and a couple of dogs, and put them into an array, like this:
+
+let pets = [Fish(), Dog(), Fish(), Dog()]
+
+/// If we want to loop over the `pets` array and ask all the dogs to bark, we need to perform a typecast: Swift will check to see whether each pet is a `Dog` object, and if it is we can then call `makeNoise()`.
+
+/// This uses a new keyword called `as?`, which returns an optional: it will be `nil` if the typecast failed, or a converted type otherwise.
+
+for pet in pets {
+    if let dog = pet as? Dog {
+        dog.makeNoise()
+    }
+}
