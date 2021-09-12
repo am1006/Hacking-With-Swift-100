@@ -8,43 +8,56 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var showingAlert = false
+    @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"].shuffled()
+    @State private var correctAnswer = Int.random(in: 0...2)
+    
+    @State private var showingScore = false
+    @State private var scoreTitle = ""
 
-    // Must be ONE thing that conforms to the View protocol, otherwise, use Stacks
     var body: some View {
-        VStack(alignment: .center) {
-            Button("Show Alert") {
-                self.showingAlert = true
-            }
-            .alert(isPresented: $showingAlert) {
-                Alert(title: Text("Hello World!"), message: Text("Hey! you just triggered the alert!"), dismissButton: .default(Text("OK")))
-            }
-            
-            Button(action: {
-                print("Button was tapped")
-            }) {
-                HStack {
-                    Image(systemName: "pencil")
-                        .renderingMode(.original)
-                    Text("Edit")
+        ZStack {
+            Color(red: 0.93, green: 0.94, blue: 0.96).ignoresSafeArea()
+
+            VStack(spacing: 30) {
+                VStack {
+                    Text("Tap the flag of")
+                        .font(.headline)
+                        .fontWeight(.light)
+                    Text(countries[correctAnswer])
+                        .font(.largeTitle)
+                        .fontWeight(.black)
                 }
-            }
-            
-            // this is a whole view of its own
-            LinearGradient(gradient: Gradient(colors: [Color.red, Color.blue]), startPoint: /*@START_MENU_TOKEN@*/.leading/*@END_MENU_TOKEN@*/, endPoint: /*@START_MENU_TOKEN@*/.trailing/*@END_MENU_TOKEN@*/)
-            
-            RadialGradient(gradient: Gradient(colors: [Color.red, Color.blue]), center: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/, startRadius: /*@START_MENU_TOKEN@*/5/*@END_MENU_TOKEN@*/, endRadius: /*@START_MENU_TOKEN@*/500/*@END_MENU_TOKEN@*/)
-            
-            AngularGradient(gradient: Gradient(colors: [Color.red, Color.blue, .yellow, .green, .red]), center:.center)
-            
-            Text("Hello, world!")
-                .padding()
-            
-            Button("Tap me") {
-                print("Tapped")
+                
+                ForEach(0 ..< 3) {number in
+                    Button(action: {
+                        // flag tapped
+                        self.flagTapped(number)
+                    }, label: {
+                        Image(self.countries[number])
+                            .renderingMode(.original)
+                            .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
+                            .shadow(radius: /*@START_MENU_TOKEN@*/10/*@END_MENU_TOKEN@*/)
+                    })
+                }
+                
+                Spacer()
             }
         }
-//        .background(Color.red)
+        .alert(isPresented: $showingScore, content: {
+            Alert(title: Text(scoreTitle), message: Text("Your score is ???"), dismissButton: .default(Text("Continue")) {
+                self.askQuestion()
+            })
+        })
+    }
+    
+    func flagTapped(_ number: Int) {
+        scoreTitle = (number == correctAnswer) ? "Correct" : "Wrong"
+        showingScore = true
+    }
+    
+    func askQuestion() {
+        _ = countries.shuffled()
+        correctAnswer = Int.random(in: 0...2)
     }
 }
 
