@@ -7,6 +7,17 @@
 
 import SwiftUI
 
+struct FlagImage: View {
+    var countryName: String
+
+    var body: some View {
+        Image(countryName)
+            .renderingMode(.original)
+            .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
+            .shadow(radius: 10)
+    }
+}
+
 struct ContentView: View {
     @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"].shuffled()
     @State private var correctAnswer = Int.random(in: 0...2)
@@ -14,10 +25,13 @@ struct ContentView: View {
     @State private var showingScore = false
     @State private var scoreTitle = ""
     @State private var score = 0
+    
+    // Detect system color mode
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         ZStack {
-            Color(red: 0.93, green: 0.94, blue: 0.96).ignoresSafeArea()
+            Color(colorScheme == .light ? CGColor(red: 0.93, green: 0.94, blue: 0.96, alpha: 1) : CGColor(red: 0.18, green: 0.20, blue: 0.25, alpha: 1.00)).ignoresSafeArea()
 
             VStack(spacing: 30) {
                 VStack {
@@ -37,10 +51,7 @@ struct ContentView: View {
                         // flag tapped
                         self.flagTapped(number)
                     }, label: {
-                        Image(self.countries[number])
-                            .renderingMode(.original)
-                            .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
-                            .shadow(radius: /*@START_MENU_TOKEN@*/10/*@END_MENU_TOKEN@*/)
+                        FlagImage(countryName: self.countries[number])
                     })
                 }
                 

@@ -69,9 +69,23 @@ import SwiftUI
 // 8. View composition
 
 // 9. Custom modifiers
-// ???
 // What is a modifier in swift?
+// a function of View Struct
+// extension View {... func here}
 
+struct ProminentTitle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(/*@START_MENU_TOKEN@*/.largeTitle/*@END_MENU_TOKEN@*/)
+            .foregroundColor(.blue)
+    }
+}
+
+extension View {
+    func prominentTitle() -> some View {
+        self.modifier(ProminentTitle())
+    }
+}
 
 // 10. Custom containers
 //
@@ -80,9 +94,7 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         Text("Hello, world!")
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.red)
-            .edgesIgnoringSafeArea(.all)
+            .prominentTitle()
     }
 }
 
