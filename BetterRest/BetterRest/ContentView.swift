@@ -15,6 +15,7 @@ struct ContentView: View {
     @State private var alertTitle = ""
     @State private var alertMessage = ""
     @State private var showingAlert = false
+    @State private var showingHero = false
     
     static var defaultWakeTime: Date {
         var components = DateComponents()
@@ -41,21 +42,55 @@ struct ContentView: View {
                     Stepper(value: $coffeeAmount, in: 0...20) {
                         Text("\(coffeeAmount) cup\(coffeeAmount == 0 || coffeeAmount == 1 ? "" : "s")")
                     }
+                    Picker("Number of cups", selection: $coffeeAmount) {
+                            ForEach(0 ..< 21) {
+                                Text("\($0) cup\($0 == 0 || $0 == 1 ? "" : "s")")
+                            }
+                        }
+                    .pickerStyle(.wheel)
                 }
+                
+                if showingHero {
+                    Section(header: Text(alertTitle)) {
+                        HStack {
+                            Spacer()
+                            Text(calculateBedtime())
+                                .font(.largeTitle)
+                            Spacer()
+                        }
+                    }
+                }
+
             }
             .navigationTitle("😴 BetterRest")
-            .navigationBarItems(trailing:
-                                    Button(action: calculateBedtime, label: {
-                                        Text("Calculate")
-                                    })
-            )
+/// @Deprecated
+//            .navigationBarItems(trailing:
+//                                    Button(action: calculateBedtime, label: {
+//                                        Text("Calculate")
+//                                    })
+//            )
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        showingHero.toggle()
+                        _ = calculateBedtime()
+                    }, label: {
+                        Text("\(showingHero ? "Hide" : "Show")")
+                    })
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: alertBedtime, label: {
+                        Text("Calculate")
+                    })
+                }
+            }
             .alert(isPresented: $showingAlert, content: {
                 Alert(title: Text(alertTitle), message: Text(alertMessage), dismissButton: .default(Text("OK")))
             })
         }
     }
     
-    func calculateBedtime() {
+    func calculateBedtime() -> String {
         let model = SleepCalculator()
         
         // Convert Date instance to seconds
@@ -79,6 +114,11 @@ struct ContentView: View {
             alertMessage = "Sorry, there was a problem calculating your bedtime."
         }
         
+        return alertMessage
+    }
+    
+    func alertBedtime() {
+        _ = calculateBedtime()
         showingAlert = true
     }
 }
